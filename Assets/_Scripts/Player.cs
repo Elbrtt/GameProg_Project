@@ -1,9 +1,21 @@
+using System.Collections;
+using TMPro;
 using UnityEngine;
 public class Player : MonoBehaviour
 {
     private InputSystem_Actions playerInput;
-    [SerializeField] private float playerSpeed = 3f;
+
     [SerializeField] private float rotateSpeed = 4f;
+    [SerializeField] private TextMeshProUGUI detectText;
+
+    private MovemenComponent movementComponent;
+
+    public bool isDetected;
+
+    private void Awake()
+    {
+        movementComponent = GetComponent<MovemenComponent>();
+    }
 
     void Start()
     {
@@ -14,10 +26,37 @@ public class Player : MonoBehaviour
 
     void Update()
     {
-        Vector2 moveInput = playerInput.Player.Move.ReadValue<Vector2>();
+        if(isDetected)
+        {
+            detectText.text = "detected";
+            detectText.color = Color.red;
+            StartCoroutine(ResetDetect());
+        }
+        else
+        {
+            detectText.text = "not detected";
+            detectText.color = Color.white;
+        }
+
+        HandleMovement();
+    }
+
+    private void HandleMovement()
+    {
+        Vector2 moveInput = playerInput.Player.Move.ReadValue<Vector2>().normalized;
+
+        float moveDistance = movementComponent.GetSpeed() * Time.deltaTime;
         Vector3 moveDir = new Vector3(moveInput.x, 0, moveInput.y);
-        transform.position += moveDir * Time.deltaTime * playerSpeed;
 
         transform.forward = Vector3.Slerp(transform.forward, moveDir, Time.deltaTime * rotateSpeed);
+
+        movementComponent.Move(moveDir, moveDistance);
+    }
+
+    private IEnumerator ResetDetect()
+    {
+        yield return new WaitForSeconds(2f);
+
+        isDetected = false;
     }
 }

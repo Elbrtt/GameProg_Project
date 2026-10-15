@@ -4,8 +4,9 @@ using UnityEngine;
 public class WatchTower : MonoBehaviour
 {
     [SerializeField] private BoxCollider boxCollider;
-    [SerializeField] private TextMeshProUGUI text;
     [SerializeField] private LayerMask playerLayer;
+
+    private Player cachePlayer;
 
     private void Update()
     {
@@ -16,18 +17,17 @@ public class WatchTower : MonoBehaviour
 
         if(result.Length <= 0 )
         {
-            text.text = "Not Detected";
-            text.color = Color.white;
             return;
         }
 
         foreach(Collider c in result)
         {
-            if(c.TryGetComponent(out Player player))
+            if(c.TryGetComponent(out Player player) && !player.isDetected)
             {
-                text.text = "Detected";
-                text.color = Color.red;
+                Debug.Log(transform + "playerDetected");
+                player.isDetected = true;
             }
+
         }
     }
 }
